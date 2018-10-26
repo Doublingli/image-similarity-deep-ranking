@@ -1023,7 +1023,7 @@ class DirectoryIterator(Iterator):
         batch_x = np.zeros((current_batch_size,) + self.image_shape, dtype=K.floatx())
         grayscale = self.color_mode == 'grayscale'
         # build batch of image data
-        print(self.filenames)
+        #print(self.filenames)
 
         for i, j in enumerate(index_array):
             fname = self.filenames[j]

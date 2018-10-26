@@ -71,7 +71,7 @@ def deep_rank_model():
     merge_one = concatenate([first_max, second_max])
 
     merge_two = concatenate([merge_one, convnet_model.output])
-    emb = Dense(4096)(merge_two)
+    emb = Dense(24)(merge_two)
     l2_norm_final = Lambda(lambda  x: K.l2_normalize(x,axis=1))(emb)
 
     final_model = Model(inputs=[first_input, second_input, convnet_model.input], outputs=l2_norm_final)

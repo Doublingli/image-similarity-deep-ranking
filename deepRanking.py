@@ -1,4 +1,4 @@
-# coding: utf-8
+ # coding: utf-8
 
 from  __future__ import absolute_import
 from __future__ import print_function
@@ -49,7 +49,7 @@ def deep_rank_model():
     merge_one = concatenate([first_max, second_max])
 
     merge_two = concatenate([merge_one, convnet_model.output])
-    emb = Dense(4096)(merge_two)
+    emb = Dense(24)(merge_two)
     l2_norm_final = Lambda(lambda  x: K.l2_normalize(x,axis=1))(emb)
 
     final_model = Model(inputs=[first_input, second_input, convnet_model.input], outputs=l2_norm_final)
@@ -96,7 +96,7 @@ dg = DataGenerator({
 "fill_mode": 'nearest' 
 }, target_size=(224, 224))
 
-batch_size = 8
+batch_size = 6
 batch_size *= 3
 train_generator = dg.get_train_generator(batch_size)
 
@@ -125,11 +125,8 @@ deep_rank_model.compile(loss=_loss_tensor, optimizer=SGD(lr=0.001, momentum=0.9,
 
 
 train_steps_per_epoch = int((15099)/batch_size)
-train_epocs = 25
-deep_rank_model.fit_generator(train_generator,
-                        steps_per_epoch=train_steps_per_epoch,
-                        epochs=train_epocs
-                        )
+train_epocs = 1
+deep_rank_model.fit_generator(train_generator, steps_per_epoch=train_steps_per_epoch, epochs=train_epocs)
 
 model_path = "deepranking.h5"
 deep_rank_model.save_weights(model_path)
