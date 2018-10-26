@@ -17,15 +17,15 @@ ap.add_argument("-i2", "--image2", required=True,
 args = vars(ap.parse_args())
 
 if not os.path.exists(args['model']):
-    print "The model path doesn't exist!"
+    print ("The model path doesn't exist!")
     exit()
 
 if not os.path.exists(args['image1']):
-    print "The image 1 path doesn't exist!"
+    print ("The image 1 path doesn't exist!")
     exit()
 
 if not os.path.exists(args['image2']):
-    print "The image 2 path doesn't exist!"
+    print ("The image 2 path doesn't exist!")
     exit()
 
 args = vars(ap.parse_args())

@@ -17,6 +17,8 @@ config.gpu_options.allow_growth=True
 sess = tf.Session(config=config)
 K.set_session(sess)
 
+triplet_file_name = "./dataset-output/triplets.txt"
+
 def convnet_model_():
     vgg_model = VGG16(weights=None, include_top=False)
     x = vgg_model.output
@@ -72,14 +74,14 @@ class DataGenerator(object):
         return self.idg.flow_from_directory("./dataset/",
                                             batch_size=batch_size,
                                             target_size=self.target_size,shuffle=False,
-                                            triplet_path  ='./triplet_5033.txt'
+                                            triplet_path  = triplet_file_name
                                            )
 
     def get_test_generator(self, batch_size):
         return self.idg.flow_from_directory("./dataset/",
                                             batch_size=batch_size,
                                             target_size=self.target_size, shuffle=False,
-                                            triplet_path  ='./triplet_5033.txt'
+                                            triplet_path  = triplet_file_name
                                         )
 
 
@@ -94,7 +96,7 @@ dg = DataGenerator({
 "fill_mode": 'nearest' 
 }, target_size=(224, 224))
 
-batch_size = 8 
+batch_size = 8
 batch_size *= 3
 train_generator = dg.get_train_generator(batch_size)
 
@@ -111,7 +113,7 @@ def _loss_tensor(y_true, y_pred):
             n_embedding = y_pred[i+2]
             D_q_p =  K.sqrt(K.sum((q_embedding - p_embedding)**2))
             D_q_n = K.sqrt(K.sum((q_embedding - n_embedding)**2))
-            loss = (loss + g + D_q_p - D_q_n )            
+            loss = (loss + g + D_q_p - D_q_n )
         except:
             continue
     loss = loss/(batch_size/3)

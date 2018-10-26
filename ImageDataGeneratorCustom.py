@@ -1,4 +1,4 @@
-"""Fairly basic set of tools for real-time data augmentation on image data.
+"""fairly basic set of tools for real-time data augmentation on image data.
 Can easily be extended to include new transformations,
 new preprocessing methods, etc...
 """
@@ -932,6 +932,8 @@ class DirectoryIterator(Iterator):
                  data_format=None,
                  save_to_dir=None, save_prefix='', save_format='png',
                  follow_links=False):
+
+
         if data_format is None:
             data_format = K.image_data_format()
         self.directory = directory
@@ -974,6 +976,8 @@ class DirectoryIterator(Iterator):
             for subdir in sorted(os.listdir(directory)):
                 if os.path.isdir(os.path.join(directory, subdir)):
                     classes.append(subdir)
+
+
         self.num_class = len(classes)
         self.class_indices = dict(zip(classes, range(len(classes))))
 
@@ -994,9 +998,9 @@ class DirectoryIterator(Iterator):
         self.classes = np.zeros((batch_size,), dtype='int32')
         i = 0
         for dirpath in (os.path.join(directory, subdir) for subdir in classes):
-            results.append(pool.apply_async(_list_valid_filenames_in_directory,
-                                            (dirpath, white_list_formats,
-                                             self.class_indices, follow_links,triplet_path)))
+            #result = _list_valid_filenames_in_directory(dirpath, white_list_formats, self.class_indices, follow_links, triplet_path)
+            #results.append(result)
+            results.append(pool.apply_async(_list_valid_filenames_in_directory, (dirpath, white_list_formats, self.class_indices, follow_links,triplet_path)))
         for res in results:
             classes, filenames = res.get()
             #self.classes = np.zeros((len(filenames),), dtype='int32')
@@ -1019,6 +1023,8 @@ class DirectoryIterator(Iterator):
         batch_x = np.zeros((current_batch_size,) + self.image_shape, dtype=K.floatx())
         grayscale = self.color_mode == 'grayscale'
         # build batch of image data
+        print(self.filenames)
+
         for i, j in enumerate(index_array):
             fname = self.filenames[j]
             img = load_img(os.path.join(self.directory, fname),

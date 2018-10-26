@@ -63,6 +63,7 @@ def triplet_sampler(directory_path, output_path,num_neg_images,num_pos_images):
                     triplets.append(negative_image+'\n')
             
     f = open(os.path.join(output_path,"triplets.txt"),'w')
+    a_string = "".join(triplets)
     f.write("".join(triplets))
     f.close()
 
