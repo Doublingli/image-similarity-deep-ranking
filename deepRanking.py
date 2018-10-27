@@ -17,7 +17,9 @@ config.gpu_options.allow_growth=True
 sess = tf.Session(config=config)
 K.set_session(sess)
 
-triplet_file_name = "./dataset-output/triplets.txt"
+triplet_file_name = "./triplets.txt"
+class_number = 106
+train_epocs = 100
 
 def convnet_model_():
     vgg_model = VGG16(weights=None, include_top=False)
@@ -32,7 +34,6 @@ def convnet_model_():
     return convnet_model
 
 def deep_rank_model():
- 
     convnet_model = convnet_model_()
     first_input = Input(shape=(224,224,3))
     first_conv = Conv2D(96, kernel_size=(8, 8),strides=(16,16), padding='same')(first_input)
@@ -49,7 +50,7 @@ def deep_rank_model():
     merge_one = concatenate([first_max, second_max])
 
     merge_two = concatenate([merge_one, convnet_model.output])
-    emb = Dense(24)(merge_two)
+    emb = Dense(class_number)(merge_two)
     l2_norm_final = Lambda(lambda  x: K.l2_normalize(x,axis=1))(emb)
 
     final_model = Model(inputs=[first_input, second_input, convnet_model.input], outputs=l2_norm_final)
@@ -125,7 +126,6 @@ deep_rank_model.compile(loss=_loss_tensor, optimizer=SGD(lr=0.001, momentum=0.9,
 
 
 train_steps_per_epoch = int((15099)/batch_size)
-train_epocs = 1
 deep_rank_model.fit_generator(train_generator, steps_per_epoch=train_steps_per_epoch, epochs=train_epocs)
 
 model_path = "deepranking.h5"

@@ -3,33 +3,6 @@
 import argparse
 import os
 
-# construct the argument parser and parse the arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("-m", "--model", required=True,
-    help="Path to the deep ranking model")
-
-ap.add_argument("-i1", "--image1", required=True,
-    help="Path to the first image")
-
-ap.add_argument("-i2", "--image2", required=True,
-    help="Path to the second image")
-
-args = vars(ap.parse_args())
-
-if not os.path.exists(args['model']):
-    print ("The model path doesn't exist!")
-    exit()
-
-if not os.path.exists(args['image1']):
-    print ("The image 1 path doesn't exist!")
-    exit()
-
-if not os.path.exists(args['image2']):
-    print ("The image 2 path doesn't exist!")
-    exit()
-
-args = vars(ap.parse_args())
-
 import numpy as np
 from keras.applications.vgg16 import VGG16
 from keras.layers import *
@@ -54,7 +27,6 @@ def convnet_model_():
     return convnet_model
 
 def deep_rank_model():
- 
     convnet_model = convnet_model_()
     first_input = Input(shape=(224,224,3))
     first_conv = Conv2D(96, kernel_size=(8, 8),strides=(16,16), padding='same')(first_input)
@@ -78,31 +50,51 @@ def deep_rank_model():
 
     return final_model
 
+def load_image(image_path):
+    image = load_img(image_path)
+    image = img_to_array(image).astype("float64")
+    image = transform.resize(image, (224, 224))
+    image *= 1. / 255
+    image = np.expand_dims(image, axis = 0)
+    return image
 
-model = deep_rank_model()
+def main():
+    # construct the argument parser and parse the arguments
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-m", "--model", required=True,
+        help="Path to the deep ranking model")
+    ap.add_argument("-i1", "--image1", required=True,
+        help="Path to the first image")
+    ap.add_argument("-i2", "--image2", required=True,
+        help="Path to the second image")
+    args = vars(ap.parse_args())
+    if not os.path.exists(args['model']):
+        print ("The model path doesn't exist!")
+        exit()
+    if not os.path.exists(args['image1']):
+        print ("The image 1 path doesn't exist!")
+        exit()
+    if not os.path.exists(args['image2']):
+        print ("The image 2 path doesn't exist!")
+        exit()
+    args = vars(ap.parse_args())
 
-# for layer in model.layers:
-#     print (layer.name, layer.output_shape)
+    model = deep_rank_model()
+    model.load_weights(args['model'])
 
-model.load_weights(args['model'])
+    image1 = load_image(args["image1"])
 
-image1 = load_img(args['image1'])
-image1 = img_to_array(image1).astype("float64")
-image1 = transform.resize(image1, (224, 224))
-image1 *= 1. / 255
-image1 = np.expand_dims(image1, axis = 0)
+    image2 = load_image(args["image2"])
 
-embedding1 = model.predict([image1, image1, image1])[0]
+    distance = compare(model, image1, image2)
 
-image2 = load_img(args['image2'])
-image2 = img_to_array(image2).astype("float64")
-image2 = transform.resize(image2, (224, 224))
-image2 *= 1. / 255
-image2 = np.expand_dims(image2, axis = 0)
+    print (distance)
 
-embedding2 = model.predict([image2,image2,image2])[0]
+def compare(model, image1, image2):
+    embedding1 = model.predict([image1, image1, image1])[0]
+    embedding2 = model.predict([image2,image2,image2])[0]
+    distance = sum([(embedding1[idx] - embedding2[idx])**2 for idx in range(len(embedding1))])**(0.5)
+    return distance
 
-distance = sum([(embedding1[idx] - embedding2[idx])**2 for idx in range(len(embedding1))])**(0.5)
-
-print (distance)
-
+if __name__ == "__main__":
+    main()
